@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Configuration;
-using System.Xml;
 
 namespace CodeChallenge
 {
     class Program
     {
-       
+        //collections of different generators
         public static List<WindGenerator> windGenerators = new List<WindGenerator>();
         public static List<GasGenerator> gasGenerators = new List<GasGenerator>();
         public static List<CoalGenerator> coalGenerators = new List<CoalGenerator>();
@@ -19,55 +16,52 @@ namespace CodeChallenge
         static void Main(string[] args)
         {
 
-            GetFactorData();
+            Factor.GetFactorData();
 
-            //run 
-            string inputPath = ConfigurationSettings.AppSettings.Get("InputDir");
-            do
+            string inputPath = ConfigurationSettings.AppSettings.Get("InputDir"); // input path for xml file detection
+            
+            //loops while the directory is empty          
+            while (IsDirectoryEmpty(inputPath))
             {
                 Console.WriteLine("Directory Empty: No Input File Found");
             }
-            while (IsDirectoryEmpty(inputPath));
 
-
+            //if directory is not empty
             if (!IsDirectoryEmpty(inputPath))
             {
+                //gets the directory info
                 DirectoryInfo dInfo = new DirectoryInfo(inputPath);
-                foreach(FileInfo fileInfo in dInfo.GetFiles())
-                {
-                    Parser parser = ParserFactory.getParser(fileInfo.Extension);
-                    parser.parseReport(inputPath, fileInfo.Name, out windGenerators, out gasGenerators, out coalGenerators);
-                }
+               
+                    foreach (FileInfo fileInfo in dInfo.GetFiles())
+                    {
+                        //if the current files name contains report then parse
+                        if (fileInfo.Name.Contains("Report"))
+                        {
+                           
+                           Console.WriteLine("Input Data Found: " + fileInfo.Name);
+
+                           //gets a parser from the factory that matched the extenion type (XML, DB or JSON etc.)
+                           Parser parser = ParserFactory.getParser(fileInfo.Extension);
+                           parser.parseReport(inputPath, fileInfo.Name, out windGenerators, out gasGenerators, out coalGenerators); // parse a report
+                            
+                        }
+
+                    }
+                //generates an output file with all the collected data
+                OutputGenerator og = new OutputGenerator(windGenerators, gasGenerators, coalGenerators);
+                og.WriteToXML();
             }
 
-          
-            OutputGenerator og = new OutputGenerator(windGenerators, gasGenerators, coalGenerators);
-            og.WriteToXML();
+                   
         }
 
-
+        //returns bool for directory being empty
         public static bool IsDirectoryEmpty(string path)
         {
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
 
-        private static void GetFactorData()
-        {
-            string dataPath = ConfigurationSettings.AppSettings.Get("ReferenceDataPath");
-            DirectoryInfo refDataInfo = new DirectoryInfo(dataPath);
-
-            foreach (FileInfo dataFileInfo in refDataInfo.GetFiles())
-            {
-                Console.WriteLine(dataFileInfo.Name);
-
-
-                Parser dataParser = ParserFactory.getParser(dataFileInfo.Extension);
-                dataParser.parseStaticData(dataPath, dataFileInfo.Name, "ValueFactor", out ValueFactor.high, out ValueFactor.medium, out ValueFactor.low);
-                dataParser.parseStaticData(dataPath, dataFileInfo.Name, "EmissionsFactor", out EmissionsFactor.high, out EmissionsFactor.medium, out EmissionsFactor.low);
-
-            }
-
-        }
+      
 
 
     }

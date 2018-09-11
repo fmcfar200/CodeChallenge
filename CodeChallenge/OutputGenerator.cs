@@ -8,8 +8,10 @@ using System.Xml;
 
 namespace CodeChallenge
 {
+    //output generator class
     class OutputGenerator
     {
+        //collection of generators
         private List<WindGenerator> windGenerators;
         private List<GasGenerator> gasGenerators;
         private List<CoalGenerator> coalGenerators;
@@ -20,23 +22,28 @@ namespace CodeChallenge
             gasGenerators = gasGens;
             coalGenerators = coalGens;
 
-            getDailyEmmissions();
+            getDailyEmmissions(); // gets the daily emissions
           
            
         }
 
+        //creates the xml output
         public void WriteToXML()
         {
+            //filename string
             string fileName = ConfigurationSettings.AppSettings.Get("OutputDir") + "GenerationOutput.xml";
 
+            //xml text writer 
             XmlTextWriter writer = new XmlTextWriter(fileName, System.Text.Encoding.UTF8);
             writer.Formatting = Formatting.Indented;
 
+            //starts the doc
             writer.WriteStartDocument();
 
-            writer.WriteStartElement("GenerationOutput");
-            writer.WriteStartElement("Totals");
+            writer.WriteStartElement("GenerationOutput"); // root
+            writer.WriteStartElement("Totals"); // child
 
+            //writes all the totals of the generators
             foreach(CoalGenerator gen in coalGenerators)
             {
                 writer.WriteStartElement("Generator");
@@ -66,24 +73,28 @@ namespace CodeChallenge
 
             writer.WriteEndElement(); // totals end
 
+            // max emissions node
             writer.WriteStartElement("MaxEmissionGenerators");
-            List<EmissionOutput> emmissionOut = new List<EmissionOutput>();
-            emmissionOut = getHighestEmissions();
+            List<EmissionOutput> emmissionOut = new List<EmissionOutput>(); // list of emission output objects
+            emmissionOut = getHighestEmissions(); // set to the return of the gethighestEmission function
 
+            //writes each object data
             foreach(EmissionOutput eo in emmissionOut)
             {
                 writer.WriteStartElement("Day");
 
                 writer.WriteElementString("Name", eo.name);
                 writer.WriteElementString("Date", eo.date);
-                writer.WriteElementString("Emission", eo.emmissions.ToString());
+                writer.WriteElementString("Emission", eo.emissions.ToString());
 
                 writer.WriteEndElement();
 
             }
             writer.WriteEndElement(); // max emission end
 
+            //actual heat nodes
             writer.WriteStartElement("ActualHeatRates");
+            //writes each coal element data
             foreach(CoalGenerator gen in coalGenerators)
             {
                 writer.WriteStartElement("Generator");
@@ -101,13 +112,16 @@ namespace CodeChallenge
 
 
             writer.WriteEndDocument();
-
+            //flush stream nd close writer and file
             writer.Flush();
             writer.Close();
+
+            Console.WriteLine("Output Generated: " + fileName);
 
 
         }
 
+        //sets the daily emissions
         public void getDailyEmmissions()
         {
             foreach(GasGenerator generator in gasGenerators)
@@ -115,7 +129,6 @@ namespace CodeChallenge
                 foreach(Generation gen in generator.generations)
                 {
                     gen.emmisions = gen.energy * generator.emissionsRating * generator.getEFactorValue();
-                    Console.WriteLine(gen.emmisions);
                 }
             }
 
@@ -124,16 +137,17 @@ namespace CodeChallenge
                 foreach (Generation gen in generator.generations)
                 {
                     gen.emmisions = gen.energy * generator.emissionsRating * generator.getEFactorValue();
-                    Console.WriteLine(gen.emmisions);
 
                 }
             }
         }
 
+        //returns the list of highest emmissions
         public List<EmissionOutput> getHighestEmissions()
         {
             List<EmissionOutput> emOutputs = new List<EmissionOutput>();
 
+            //compares the emissions from matching dates and adds a new emission output object to the collection
             foreach(GasGenerator gGen in gasGenerators)
             {
                 foreach(CoalGenerator cGen in coalGenerators)
@@ -169,17 +183,20 @@ namespace CodeChallenge
         }
     }
 
+    //object made for the output for highest emissions
     class EmissionOutput
     {
+        //generation name , date and emissions 
         public string name;
         public string date;
-        public double emmissions;
+        public double emissions;
 
+        //constructor
         public EmissionOutput(string theName, string theDate, double theEmissions)
         {
             name = theName;
             date = theDate;
-            emmissions = theEmissions;
+            emissions = theEmissions;
         }
     }
 }
