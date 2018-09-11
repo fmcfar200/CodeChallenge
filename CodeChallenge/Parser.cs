@@ -73,7 +73,7 @@ namespace CodeChallenge
                     foreach (XmlNode gen in gens)
                     {
                         string name = gen.SelectSingleNode("Name").InnerText;
-                        List<Day> generations = new List<Day>();
+                        List<Generation> generations = new List<Generation>();
 
                         XmlNodeList generationNodes = gen.SelectNodes("Generation/Day");
                         foreach (XmlNode dayNode in generationNodes)
@@ -81,9 +81,26 @@ namespace CodeChallenge
                             string date = dayNode.SelectSingleNode("Date").InnerText;
                             double energy = double.Parse(dayNode.SelectSingleNode("Energy").InnerText);
                             double price = double.Parse(dayNode.SelectSingleNode("Price").InnerText);
-                            Day day = new Day(date, energy, price);
-                            generations.Add(day);                            
+
+                            Generation dayGen = new Generation(date, energy, price);
+                            generations.Add(dayGen);                            
                         }
+
+                        double emissionsRating = 0;
+                        double totalHeatInput = 0;
+                        double actualNetGeneration = 0;
+                        if (name.Contains("Gas") || name.Contains("Coal"))
+                        {
+                            emissionsRating = double.Parse(gen.SelectSingleNode("EmissionsRating").InnerText);
+                            if (name.Contains("Coal"))
+                            {
+                                totalHeatInput = double.Parse(gen.SelectSingleNode("TotalHeatInput").InnerText);
+                                actualNetGeneration = double.Parse(gen.SelectSingleNode("ActualNetGeneration").InnerText);
+
+                            }
+                        }
+
+                      
 
                         Generator.ValueFactorType vType;
                         GasGenerator.EmissionFactorType eType;
@@ -105,14 +122,14 @@ namespace CodeChallenge
                         {
                             vType = Generator.ValueFactorType.MEDIUM;
                             eType = GasGenerator.EmissionFactorType.MEDIUM;
-                            GasGenerator g = new GasGenerator(name, generations, vType, eType);
+                            GasGenerator g = new GasGenerator(name, generations, emissionsRating, vType, eType);
                             gasList.Add(g);
                         }
                         else if (name.Contains("Coal"))
                         {
                             vType = Generator.ValueFactorType.MEDIUM;
                             eType = GasGenerator.EmissionFactorType.HIGH;
-                            CoalGenerator g = new CoalGenerator(name, generations, vType, eType);
+                            CoalGenerator g = new CoalGenerator(name, generations, emissionsRating, totalHeatInput, actualNetGeneration, vType, eType);
                             coalList.Add(g);
 
                         }

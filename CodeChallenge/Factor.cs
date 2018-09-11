@@ -6,34 +6,18 @@ using System.Threading.Tasks;
 
 namespace CodeChallenge
 {
-    public class Factor
+    public static class ValueFactor
     {
-        public double high, medium, low;
+        public static double high, medium, low;
 
-        public Factor() { }
-        public Factor(double thehigh, double themedium, double thelow)
-        {
-            high = thehigh;
-            medium = themedium;
-            low = thelow;
-        }
+    
     }
 
-    class ValueFactor : Factor
+    public static class EmissionsFactor
     {
-        public ValueFactor() : base() { }
-        public ValueFactor(double thehigh, double themedium, double thelow) : base(thehigh,themedium,thelow)
-        {
+        public static double high, medium, low;
 
-        }
 
-    };
-    class EmissionsFactor : Factor
-    {
-        public EmissionsFactor() : base() { }
-        public EmissionsFactor(double thehigh, double themedium, double thelow) : base(thehigh,themedium,thelow)
-        {
+    }
 
-        }
-    };
 }

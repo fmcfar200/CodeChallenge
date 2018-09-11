@@ -11,9 +11,7 @@ namespace CodeChallenge
 {
     class Program
     {
-        public static EmissionsFactor eFactor = new EmissionsFactor();
-        public static ValueFactor vFactor = new ValueFactor();
-
+       
         public static List<WindGenerator> windGenerators = new List<WindGenerator>();
         public static List<GasGenerator> gasGenerators = new List<GasGenerator>();
         public static List<CoalGenerator> coalGenerators = new List<CoalGenerator>();
@@ -43,29 +41,15 @@ namespace CodeChallenge
             }
 
           
-            foreach(WindGenerator gen in windGenerators)
-            {
-                Console.WriteLine(gen.name);
-                foreach(Day day in gen.generations)
-                {
-                    Console.Write(day.date + "\n" + day.energy + "\n" + day.price + "\n"); 
-                }
-                Console.WriteLine("-------------------------------");
-                Console.WriteLine("-------------------------------");
-
-            }
-
+            OutputGenerator og = new OutputGenerator(windGenerators, gasGenerators, coalGenerators);
+            og.WriteToXML();
         }
-
-
 
 
         public static bool IsDirectoryEmpty(string path)
         {
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
-
-
 
         private static void GetFactorData()
         {
@@ -78,8 +62,8 @@ namespace CodeChallenge
 
 
                 Parser dataParser = ParserFactory.getParser(dataFileInfo.Extension);
-                dataParser.parseStaticData(dataPath, dataFileInfo.Name, eFactor.GetType().Name, out eFactor.high, out eFactor.medium, out eFactor.low);
-                dataParser.parseStaticData(dataPath, dataFileInfo.Name, vFactor.GetType().Name, out vFactor.high, out vFactor.medium, out vFactor.low);
+                dataParser.parseStaticData(dataPath, dataFileInfo.Name, "ValueFactor", out ValueFactor.high, out ValueFactor.medium, out ValueFactor.low);
+                dataParser.parseStaticData(dataPath, dataFileInfo.Name, "EmissionsFactor", out EmissionsFactor.high, out EmissionsFactor.medium, out EmissionsFactor.low);
 
             }
 

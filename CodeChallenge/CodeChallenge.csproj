@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Factor.cs" />
     <Compile Include="Generator.cs" />
+    <Compile Include="OutputGenerator.cs" />
     <Compile Include="ParserFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
